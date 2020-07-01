@@ -23,9 +23,9 @@ pipeline {
                     checkout scm
 
                     //pom.xml情報取得
-                    groupId = getGroupIdFromPom("pom.xml")
-                    artifactId = getArtifactIdFromPom("pom.xml")
-                    version = getVersionFromPom("pom.xml")
+                    groupId = getGroupIdFromPom(".\\pom.xml")
+                    artifactId = getArtifactIdFromPom(".\\pom.xml")
+                    version = getVersionFromPom(".\\pom.xml")
 
                     //初期設定
                     currentBuild.result = 'SUCCESS'
@@ -34,14 +34,14 @@ pipeline {
         }
 
         //ビルド
-        stage('Build'){
+        stage ('Build'){
             steps{
                 script{
-                    //ビルド(テストスキップ)
+                    //ビルド
                     bat "mvn package -Dmaven.test.skip=true"
 
                     //成果物保管
-                    stash name: 'release-ap', includes: '**/target/*.war'
+                    stash name: 'release-ap', includes: '**/target/*.jar'
                 }
             }
         }
@@ -53,27 +53,25 @@ pipeline {
                     //テスト実行
                     try {
                         //テスト実行
-                        bat "mvn org.jacoco:jacoco-maven-plugin:prepare-agent test"
+                        bat "mvn test"
                     } catch (Exception e) {
                         //テストは失敗してもビルドの流れを止めないため結果コードを不安定とする
                         currentBuild.result = 'UNSTABLE'
                         print "Test failure resultCode =[${currentBuild.result}]"
                         echo e.toString()
                     }
+
+                    //JUnitレポート
+                    junit '**/surefire-reports/*.xml'
                 }
             }
         }
 
         //デプロイ
-        stage('Deploy'){
+        stage ('Deploy'){
             steps{
                 script{
-                    //作業前プロセス
-                    bat "jps -l"
-                    //AP起動(起動したらタスクマネージャ等でjavaw.exeをkillする必要がある)
-                    bat "start javaw -Xmx257M -jar -Dfile.encoding=utf-8  ./target/demo-1.0.0-RELEASE.war"
-                    //作業後プロセス
-                    bat "jps -l"
+                    bat "start javaw -Xmx257M -jar -Dfile.encoding=utf-8 ./target/demo1-0.0.1-SNAPSHOT.jar"
                 }
             }
         }
@@ -82,7 +80,7 @@ pipeline {
     post{
         always{
             //成果物保存
-            archiveArtifacts artifacts: "**/target/*.war" , fingerprint: true
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
         }
         failure{
             echo "エラー"
@@ -90,12 +88,8 @@ pipeline {
         success{
             echo "正常"
         }
-        unstable{
-            echo "不安定"
-        }
     }
 }
-
 
 // pom.xml情報取得
 def getVersionFromPom(pom) {
