@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Hello Page</title>
+</head>
+    <body>
+        <p th:text="${msg}">挨拶表示</p>
+        <form action="/" method="post">
+          <select name="name">
+            <option value="English">English</option>
+            <option value="Japanease">日本語</option>
+            <option value="Chinease">中国語</option>
+            <option value="ETC">その他</option>
+            <option value=""></option>
+          </select>
+          <input type="submit" value="Click">
+        </form>
+
+    </body>
+</html>
