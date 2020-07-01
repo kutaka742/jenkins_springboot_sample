@@ -70,8 +70,8 @@ pipeline {
                 script{
                     //作業前プロセス
                     bat "jps -l"
-                    //AP起動(起動したらタスクマネージャ等でjavaw.exeをkillする必要がある)
-                    bat "start javaw -Xmx257M -jar -Dfile.encoding=utf-8  ./target/demo-1.0.0-RELEASE.war"
+                    //AP起動(起動したらタスクマネージャ等でjava.exeをkillする必要がある)
+                    bat "start java -jar ./target/demo-1.0.0-RELEASE.war"
                     //作業後プロセス
                     bat "jps -l"
                 }
